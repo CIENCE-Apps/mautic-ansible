@@ -1,3 +1,4 @@
 roles/mautic/templates/home/ubuntu/.ssh/github_deploy.pem
 hosts
 key.pem
+vars.yaml

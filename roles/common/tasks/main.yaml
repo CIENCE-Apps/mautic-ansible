@@ -22,3 +22,8 @@
   command: dpkg-reconfigure --frontend noninteractive tzdata
   when: set_timezone is changed
   tags: timezone
+
+- name: Install Pip MySQL
+  pip:
+    name: pymysql
+    state: present

@@ -1,72 +1,112 @@
 ---
-## install mautic
-- name: Check that the index.php exists
-  stat:
-    path: /var/www/html/index.php
-  register: stat_result
+    ## install mautic
+    - name: Check that the index.php exists
+      stat:
+        path: /var/www/html/index.php
+      register: stat_result
+    
+    - name: 'Is Mautic Installed' 
+      fail: msg="Mautic is installed on this server, please check it manually"
+      when: stat_result.stat.exists
+    
+    - name: Delete /var/www/html/
+      file:
+        path: "/var/www/html/"
+        state: absent
+    
+    - name: Create directory
+      file:
+        path: "/var/www/html/"
+        state: directory
+        owner: "{{ www_user }}"
+        group: "{{ www_group }}"
+        mode: 0755
+    
+    - name: Copy SSH Config
+      template: src=home/ubuntu/.ssh/config.j2 dest=/home/ubuntu/.ssh/config owner=ubuntu group=ubuntu mode=0600
+    
+    - name: Copy github key
+      template: src=home/ubuntu/.ssh/github_deploy.pem.j2 dest=/home/ubuntu/.ssh/github_deploy.pem owner=ubuntu group=ubuntu mode=0600
+    
+    - name: Clone Repo
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "/var/www/html/"
+        version: "{{ repo_branch }}"
+        accept_hostkey: yes
+    
+    - name: composer install
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      community.general.composer:
+        command: install
+        working_dir: "/var/www/html/"
+    
+    - name: Change ownership
+      ansible.builtin.file:
+        path: "/var/www/html"
+        state: directory
+        recurse: yes
+        owner: "{{ www_user }}"
+        group: "{{ www_group }}"
+    
+    
+    - name: Fix permissions
+      shell: |
+        find . -type f -exec chmod 0644 {} \;
+        find . -type d -exec chmod 0755 {} \;
+        chmod -R g+w var/cache/
+        chmod -R g+w var/logs/
+        chmod -R g+w var/tmp/
+        chmod -R g+w var/spool/
+        chmod -R g+w app/config/
+        chmod -R g+w media/files/
+        chmod -R g+w media/images/
+        chmod -R g+w translations/
+        chmod -R g+w themes
+      args:
+        chdir: "/var/www/html"
 
-- name: 'Is Mautic Installed' 
-  fail: msg="Mautic is installed on this server, please check it manually"
-  when: stat_result.stat.exists
+    - name: Create Database
+      community.mysql.mysql_db:
+        name: '{{ database_name }}'
+        state: present
+        login_host:  '{{ database_host }}'
+        login_user: '{{ database_user }}'
+        login_password: '{{ database_password }}'
+        login_port: '{{ database_port }}'
+        encoding: utf8mb4
 
-- name: Delete /var/www/html/
-  file:
-    path: "/var/www/html/"
-    state: absent
+    - name: Create database user
+      community.mysql.mysql_user:
+        login_host:  '{{ database_host }}'
+        login_user: '{{ database_user }}'
+        login_password: '{{ database_password }}'
+        login_port: '{{ database_port }}'
+        name: '{{ database_mautic_user }}'
+        password: '{{ database_mautic_password }}'
+        priv: '{{ database_name }}.*:ALL'
+        host: "%" 
+        state: present
+    - name: Write Config file
+      template: src=var/www/html/app/config/local.php.j2 dest=/var/www/html/app/config/local.php owner=ubuntu group=www-data mode=0644
 
-- name: Create directory
-  file:
-    path: "/var/www/html/"
-    state: directory
-    owner: "{{ www_user }}"
-    group: "{{ www_group }}"
-    mode: 0755
-
-- name: Copy SSH Config
-  template: src=home/ubuntu/.ssh/config.j2 dest=/home/ubuntu/.ssh/config owner=ubuntu group=ubuntu mode=0600
-
-- name: Copy github key
-  template: src=home/ubuntu/.ssh/github_deploy.pem.j2 dest=/home/ubuntu/.ssh/github_deploy.pem owner=ubuntu group=ubuntu mode=0600
-
-- name: Clone Repo
-  become: true
-  become_method: su
-  become_user: '{{ www_user }}'
-  ansible.builtin.git:
-    repo: "{{ repo_url }}"
-    dest: "/var/www/html/"
-    version: "{{ repo_branch }}"
-    accept_hostkey: yes
-
-- name: composer install
-  become: true
-  become_method: su
-  become_user: '{{ www_user }}'
-  community.general.composer:
-    command: install
-    working_dir: "/var/www/html/"
-
-- name: Change ownership
-  ansible.builtin.file:
-    path: "/var/www/html"
-    state: directory
-    recurse: yes
-    owner: "{{ www_user }}"
-    group: "{{ www_group }}"
-
-
-- name: Fix permissions
-  shell: |
-    find . -type f -exec chmod 644 {} \;
-    find . -type d -exec chmod 755 {} \;
-    chmod -R g+w var/cache/
-    chmod -R g+w var/logs/
-    chmod -R g+w var/tmp/
-    chmod -R g+w var/spool/
-    chmod -R g+w app/config/
-    chmod -R g+w media/files/
-    chmod -R g+w media/images/
-    chmod -R g+w translations/
-    chmod -R g+w themes
-  args:
-    chdir: "/var/www/html"
+    - name: Install Mautic
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      shell: |
+        yes | php bin/console mautic:install "{{ mautic_url }}" \
+        --mailer_from_name="DDEV" --mailer_from_email="mautic@ddev.local" \
+        --mailer_transport="smtp" --mailer_host="localhost" --mailer_port="1025" \
+        --admin_firstname="{{ mautic_admin_firstname }}" --admin_lastname="{{ mautic_admin_lastname }}" --admin_username="{{ mautic_admin_username }}" \
+        --admin_email="{{ mautic_admin_email }}" --admin_password="{{ mautic_admin_password }}" \
+        
+        php bin/console cache:warmup --no-interaction --env=prod
+        php bin/console mautic:plugins:reload
+      args:
+        chdir: "/var/www/html"

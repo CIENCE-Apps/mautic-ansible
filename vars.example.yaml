@@ -18,18 +18,17 @@ composer_url: https://getcomposer.org/download/latest-stable/composer.phar
 repo_url: "mautic:mabumusa1/mautic.git"
 repo_branch: "knowde"
 
-database_name: indena
-database_host: '10.122.0.14'
-database_user: root
-database_password: 'p2FBkk6wK3t6bNA5'
+database_name: 
+database_host: 
+database_user: 
+database_password: 
 database_port: 3306
-database_mautic_user: indena
-database_mautic_password: uH4kCe9UpefdTxhb
+database_mautic_user: 
+database_mautic_password:
 
-
-mautic_url: 'https://engage.indena.store'
-mautic_admin_firstname: 'Mohammad'
-mautic_admin_lastname: "Abu Musa"
-mautic_admin_username: "m.abumusa"
-mautic_admin_email: "m.abumusa@knowde.com"
-mautic_admin_password: "p2FBkbNA5"
+mautic_url: 
+mautic_admin_firstname: 
+mautic_admin_lastname: 
+mautic_admin_username: 
+mautic_admin_email: 
+mautic_admin_password:

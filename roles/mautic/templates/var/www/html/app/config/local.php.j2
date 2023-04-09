@@ -1,0 +1,15 @@
+<?php
+$parameters = [
+    'api_enabled'           => false,
+    'api_enable_basic_auth' => false,
+    'db_driver'             => 'pdo_mysql',
+    'db_host'               => '{{ database_host }}',
+    'db_table_prefix'       => null,
+    'db_port'               => 3306,
+    'db_name'               => '{{ database_name }}',
+    'db_user'               => '{{ database_mautic_user }}',
+    'db_password'           => '{{ database_mautic_password }}',
+    'admin_email'           => 'mautic@ddev.local',
+    'admin_password'        => 'mautic',
+    'install_source'        => 'Steer Campaign',
+];
