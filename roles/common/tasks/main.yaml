@@ -1,0 +1,24 @@
+---
+- name: Upgrade packages
+  apt: upgrade=dist
+  
+- name: Install packages
+  apt:
+    name: ['fail2ban', 'git-core', 'unzip','build-essential','curl', 'nano', 'wget', 'unzip','bzip2', 'arj', 'nomarch', 'lzop','htop','openssl','gcc','git','binutils','libmcrypt4','libpcre3-dev','make','python3','python3-pip','unattended-upgrades','whois','imagemagick','uuid-runtime','software-properties-common','logrotate']
+    state: latest
+    update_cache: true
+
+
+- name: Set timezone
+  command: timedatectl set-timezone {{ time_zone }}
+  tags: timezone
+
+- name: Write the timezone file
+  template: src=etc/timezone.j2 dest=/etc/timezone owner=root group=root mode=0644
+  register: set_timezone
+  tags: timezone
+
+- name: Reconfigure the system tzdata
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+  when: set_timezone is changed
+  tags: timezone

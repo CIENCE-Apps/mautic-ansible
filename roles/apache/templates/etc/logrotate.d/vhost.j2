@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+/var/www/logs/*.log {
+ rotate 10
+ daily
+ compress
+ delaycompress
+ sharedscripts
+ 
+ postrotate
+ /usr/sbin/apache2ctl graceful > /dev/null
+ endscript
+}

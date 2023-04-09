@@ -1,0 +1,54 @@
+---
+## installs and sets up basic configs.
+- name: Add Aapche repo
+  apt_repository:
+    repo: ppa:ondrej/apache2
+
+- name: Install Apache
+  apt:
+    name: [apache2, apache2-utils]
+    state: latest
+    force: yes
+    update_cache: yes
+
+- name: Write Apache2 Security conf
+  template: src=etc/apache2/conf-available/security.conf.j2 dest=/etc/apache2/conf-available/security.conf owner=root group=root mode=0644
+  
+- name: Enable Apache2 Modules
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items:
+    - suexec
+    - rewrite 
+    - ssl
+    - actions
+    - include
+    - actions
+    - proxy_fcgi
+    - alias    
+
+- name: Add ubuntu user to apache group
+  user:
+    name: "{{ www_user }}"
+    groups: "{{ www_group }}"
+    append: yes  
+  notify: restart apache
+
+- name: Create logs directory
+  file:
+    path: /var/www/logs
+    state: directory
+    owner: "{{ www_user }}"
+    group: "{{ www_group }}"
+    mode: 0775
+    recurse: yes
+
+- name: Create a dump log
+  ansible.builtin.file:
+    path: /var/www/logs/dump.log
+    state: touch
+
+- name: Write Log Rotate Config
+  template: src=etc/logrotate.d/vhost.j2 dest=/etc/logrotate.d/vhost owner=root group=root mode=0644
+  notify: restart logrotate

@@ -1,0 +1,25 @@
+---
+- name: Remove default files
+  ansible.builtin.file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+
+- name: Remove default files
+  ansible.builtin.file:
+    path: /etc/apache2/sites-available/000-default.conf
+    state: absent
+
+- name: Remove default files
+  ansible.builtin.file:
+    path: /etc/apache2/sites-available/default-ssl.conf
+    state: absent
+
+- name: Write Site
+  template: src=etc/apache2/sites-available/mautic.conf.j2 dest=/etc/apache2/sites-available/mautic.conf owner=root group=root mode=0644
+
+- name: Symlink site
+  file:
+    src: "/etc/apache2/sites-available/mautic.conf"
+    dest: "/etc/apache2/sites-enabled/mautic.conf"
+    state: link
+  notify: reload apache

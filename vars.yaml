@@ -1,0 +1,20 @@
+---
+remote_sudo_user: ubuntu
+
+time_zone: "America/Los_Angeles"
+www_user: "ubuntu"
+www_group: "www-data"
+
+php_version: "8.0"
+php_cli_memory_limit: "6G"
+php_fpm_upload_max_filesize: "256M"
+php_fpm_post_max_size: "256M"
+php_fpm_max_execution_time: 180
+php_fpm_default_socket_timeout: 600
+php_fpm_memory_limit: "8G"
+
+composer_url: https://getcomposer.org/download/latest-stable/composer.phar
+
+
+repo_url: "mautic:mabumusa1/mautic.git"
+repo_branch: "knowde"

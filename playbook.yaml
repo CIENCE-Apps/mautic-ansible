@@ -1,0 +1,29 @@
+---
+ - hosts: servers
+   vars:
+    ansible_user: "{{ remote_sudo_user }}"
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_python_interpreter: '/usr/bin/env python3'
+    ansible_ssh_private_key_file: './key.pem'
+   vars_files:
+    - vars.yaml
+   roles:
+    -
+     role: common
+     tags: [init]
+
+    -
+     role: apache
+     tags: [init, apache]
+
+    -
+     role: fpm
+     tags: [init, fpm]     
+    -
+     role: site
+     tags: [init, site]
+    
+    -
+     role: mautic
+     tags: [mautic_install]     

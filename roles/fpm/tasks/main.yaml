@@ -1,0 +1,51 @@
+---
+## installs and sets up basic configs.
+- name: Add PHP repo
+  apt_repository:
+    repo: ppa:ondrej/php
+
+- name: Install PHP
+  apt:
+    name: ['php{{ php_version }}-cli','php{{ php_version }}-dev ','php{{ php_version }}-gd ','php{{ php_version }}-curl ','php-memcached ','php{{ php_version }}-imap ','php{{ php_version }}-mysql ','php{{ php_version }}-mbstring ','php{{ php_version }}-xml','php-imagick','php{{ php_version }}-zip','php{{ php_version }}-bcmath','php{{ php_version }}-soap ','php{{ php_version }}-intl ','php{{ php_version }}-readline ','php{{ php_version }}-common','php{{ php_version }}-pspell','php{{ php_version }}-tidy ','php{{ php_version }}-xmlrpc ','php{{ php_version }}-xsl ','php{{ php_version }}-opcache','php-apcu','php{{ php_version }}-fpm']
+    state: present
+    update_cache: yes
+
+- name: Modify PHP CLI config
+  template: src=etc/php/8.0/cli/php.ini.j2 dest=/etc/php/8.0/cli/php.ini.j2 owner=root group=root mode=0644
+
+- name: Modify PHP FPM config
+  template: src=etc/php/8.0/fpm/php.ini.j2 dest=/etc/php/8.0/fpm/php.ini.j2 owner=root group=root mode=0644
+  notify: restart fpm 
+
+- name: Install Composer
+  get_url:
+    url: '{{ composer_url }}'
+    checksum: 'sha256:{{ composer_url }}.sha256sum'
+    dest: /usr/local/bin/composer.phar
+    mode: 0755
+
+- name: Composer | Symlink composer.phar
+  file:
+    src: composer.phar
+    dest: /usr/local/bin/composer
+    state: link
+
+- name: Fix Permission sessions
+  ansible.builtin.file:
+    path: /var/lib/php/sessions
+    mode: '0733'
+
+- name: Fix Permission sessions
+  ansible.builtin.file:
+    path: /var/lib/php/sessions
+    mode: '+t'
+
+- name: Fix Permission sessions
+  ansible.builtin.file:
+    path: /var/lib/php/sessions
+    owner: "{{ www_user }}"
+    group: "{{ www_group }}"
+
+- name: Set PHP8.0 as the default
+  shell:
+    update-alternatives --set php /usr/bin/php8.0
