@@ -26,4 +26,8 @@
     
     -
      role: mautic
-     tags: [mautic_install]     
+     tags: [mautic, install]     
+
+    -
+     role: crons
+     tags: [mautic, crons]

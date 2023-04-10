@@ -1,0 +1,120 @@
+---
+    ## install crons
+    - name: install campaign update
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "campaign update"
+        minute: "*/5"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:campaigns:update > /var/www/logs/cron.log 2>&1"
+
+    - name: install campaign trigger
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "campaign trigger"
+        minute: "*/5"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:campaigns:trigger > /var/www/logs/cron.log 2>&1"
+
+    - name: send emails
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "send emails"
+        minute: "*/2"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:emails:send > /var/www/logs/cron.log 2>&1"
+
+    - name: import 
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "import"
+        minute: "*/2"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:import > /var/www/logs/cron.log 2>&1"
+
+    - name: marketing message 
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "marketing message"
+        minute: "2,17,32,47"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:messages:send > /var/www/logs/cron.log 2>&1"        
+    
+    - name: webhook process
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "webhook process"
+        minute: "4,19,34,49"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:webhooks:process > /var/www/logs/cron.log 2>&1"                
+    
+    - name: broadcast send
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "broadcast send"
+        minute: "6,21,36,51"
+        hour: "*"
+        job: "php /var/www/html/bin/console mautic:broadcasts:send > /var/www/logs/cron.log 2>&1"                        
+
+    - name: reports scheduler
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "reports scheduler"
+        minute: "0"
+        hour: "8,12"
+        job: "php /var/www/html/bin/console mautic:reports:scheduler > /var/www/logs/cron.log 2>&1"                        
+
+    - name: mautic cleanup
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "mautic cleanup"
+        minute: "0"
+        hour: "0"
+        day: "*"
+        month: "*"
+        weekday: "6"
+        job: "php /var/www/html/bin/console mautic:maintenance:cleanup > /var/www/logs/cron.log 2>&1"                                
+
+    - name: mautic deduplicate
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "mautic deduplicate"
+        minute: "0"
+        hour: "3"
+        day: "*"
+        month: "*"
+        weekday: "6"
+        job: "php /var/www/html/bin/console mautic:contacts:deduplicate > /var/www/logs/cron.log 2>&1"                                        
+
+    - name: mautic unusedip
+      become: true
+      become_method: su
+      become_user: '{{ www_user }}'
+      ansible.builtin.cron:
+        name: "mautic unusedip"
+        minute: "0"
+        hour: "5"
+        day: "*"
+        month: "*"
+        weekday: "6"
+        job: "php /var/www/html/bin/console mautic:unusedip:delete > /var/www/logs/cron.log 2>&1"
