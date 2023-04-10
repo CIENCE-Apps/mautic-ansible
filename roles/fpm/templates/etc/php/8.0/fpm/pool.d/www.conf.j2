@@ -1,0 +1,12 @@
+;{{ ansible_managed }}
+[www]
+user = {{ www_user }}
+group = {{ www_group }}
+listen = /run/php/php{{ php_version }}-fpm.sock
+listen.owner = {{ www_group }}
+listen.group = {{ www_group }}
+pm = {{ pm_type }}
+pm.max_children = {{ pm_max_children }}
+pm.start_servers = {{ pm_start_servers }}
+pm.min_spare_servers = {{ pm_min_spare_servers }}
+pm.max_spare_servers = {{ pm_max_spare_servers }}
