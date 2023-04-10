@@ -70,16 +70,17 @@
         chmod -R g+w themes
       args:
         chdir: "/var/www/html"
-
+    
     - name: Create Database
       community.mysql.mysql_db:
-        name: '{{ database_name }}'
+        name: "{{ database_name }}"
         state: present
-        login_host:  '{{ database_host }}'
-        login_user: '{{ database_user }}'
-        login_password: '{{ database_password }}'
-        login_port: '{{ database_port }}'
+        login_host:  "{{ database_host }}"
+        login_user: "{{ database_user }}"
+        login_password: "{{ database_password }}"
+        login_port: "{{ database_port }}"
         encoding: utf8mb4
+      tags: ['create_db']
 
     - name: Create database user
       community.mysql.mysql_user:
@@ -92,8 +93,12 @@
         priv: '{{ database_name }}.*:ALL'
         host: "%" 
         state: present
+        config_file: ''
+      tags: ['create_user']
+    
     - name: Write Config file
       template: src=var/www/html/app/config/local.php.j2 dest=/var/www/html/app/config/local.php owner=ubuntu group=www-data mode=0644
+      tags: ['make_local']
 
     - name: Install Mautic
       become: true
@@ -110,3 +115,4 @@
         php bin/console mautic:plugins:reload
       args:
         chdir: "/var/www/html"
+      tags: ['install_mautic']
