@@ -25,11 +25,11 @@ composer_url: https://getcomposer.org/download/latest-stable/composer.phar
 repo_url: "mautic:mabumusa1/mautic.git"
 repo_branch: "knowde"
 
-database_name: 
 database_host: 
 database_user: 
 database_password: 
 database_port: 3306
+database_name:
 database_mautic_user: 
 database_mautic_password:
 

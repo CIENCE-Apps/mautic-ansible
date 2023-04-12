@@ -26,11 +26,11 @@
     group=root 
     mode=0644
     backup=yes
-  notify: restart fpm     
+  notify: Restart Fpm     
 
 - name: Modify PHP FPM config
   template: src=etc/php/8.0/fpm/php.ini.j2 dest=/etc/php/8.0/fpm/php.ini owner=root group=root mode=0644
-  notify: restart fpm 
+  notify: Restart Fpm 
 
 - name: Install Composer
   get_url:
@@ -39,11 +39,17 @@
     dest: /usr/local/bin/composer.phar
     mode: 0755
 
+- name: verify composer exists
+  stat:
+    path: /usr/local/bin/composer
+  register: composer_path
+
 - name: Composer | Symlink composer.phar
   file:
     src: composer.phar
     dest: /usr/local/bin/composer
     state: link
+  when: "not composer_path.stat.exists"
 
 - name: Fix Permission sessions
   ansible.builtin.file:

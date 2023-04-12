@@ -2,12 +2,44 @@
  - hosts: servers
    vars:
     ansible_user: "{{ remote_sudo_user }}"
-    ansible_become: yes
+    ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: '/usr/bin/env python3'
     ansible_ssh_private_key_file: './key.pem'
    vars_files:
     - vars.yaml
+   handlers:
+    - name: Restart Apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+      become: true
+
+    - name: Reload Apache
+      ansible.builtin.service:
+        name: apache2
+        state: reloaded
+      become: true
+
+    - name: Restart Logrotate
+      ansible.builtin.service:
+        name: logrotate
+        state: reloaded
+      become: true
+
+    - name: Restart Fpm
+      ansible.builtin.service:
+        name: php{{ php_version }}-fpm
+        state: restarted
+      become: true
+
+    - name: Reload Fpm
+      ansible.builtin.service:
+        name: php{{ php_version }}-fpm
+        state: reloaded
+      become: true
+
+
    roles:
     -
      role: common

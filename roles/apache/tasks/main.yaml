@@ -1,6 +1,6 @@
 ---
 ## installs and sets up basic configs.
-- name: Add Aapche repo
+- name: Add Apache repo
   apt_repository:
     repo: ppa:ondrej/apache2
 
@@ -33,7 +33,7 @@
     name: "{{ www_user }}"
     groups: "{{ www_group }}"
     append: yes  
-  notify: restart apache
+  notify: Restart Apache
 
 - name: Create logs directory
   file:
@@ -51,4 +51,4 @@
 
 - name: Write Log Rotate Config
   template: src=etc/logrotate.d/vhost.j2 dest=/etc/logrotate.d/vhost owner=root group=root mode=0644
-  notify: restart logrotate
+  notify: Restart Logrotate
